@@ -27,7 +27,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     # ----- LOSS DE TREINO -----
     plt.figure(figsize=(10, 6))
     for i, fold_losses in enumerate(all_train_losses):
-        plt.plot(fold_losses, label=f"Fold {i+1}")
+        plt.plot(np.log(fold_losses), label=f"Fold {i+1}")
     plt.title("Loss de Treino por Fold")
     plt.xlabel("Época")
     plt.ylabel("Loss")
@@ -39,7 +39,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     # ----- LOSS DE VALIDAÇÃO -----
     plt.figure(figsize=(10, 6))
     for i, fold_losses in enumerate(all_val_losses):
-        plt.plot(fold_losses, label=f"Fold {i+1}")
+        plt.plot(np.log(fold_losses), label=f"Fold {i+1}")
     plt.title("Loss de Validação por Fold")
     plt.xlabel("Época")
     plt.ylabel("Loss")
@@ -63,8 +63,8 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     #Média folds
     plt.figure(figsize=(10,5))
     plt.title("Learning Curve - Média dos Folds")
-    plt.plot(mean_train, label="Treino (média)")
-    plt.plot(mean_val, label="Validação (média)")
+    plt.plot(np.log(mean_train), label="Treino (média)")
+    plt.plot(np.log(mean_val), label="Validação (média)")
     plt.legend()
     plt.grid()
     plt.savefig(os.path.join(output_dir, "learningCurveFolds.png"))
