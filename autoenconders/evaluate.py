@@ -33,7 +33,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.ylabel("Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(output_dir, "train_loss.png"))
+    plt.savefig(os.path.join(output_dir, f"{modelType}-train_loss.png"))
     plt.close()
 
     # ----- LOSS DE VALIDAÇÃO -----
