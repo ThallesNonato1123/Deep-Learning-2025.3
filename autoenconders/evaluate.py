@@ -63,6 +63,8 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     #Média folds
     plt.figure(figsize=(10,5))
     plt.title("Learning Curve - Média dos Folds")
+    plt.xlabel("Época")
+    plt.ylabel("Loss")
     plt.plot(np.log(mean_train), label="Treino (média)")
     plt.plot(np.log(mean_val), label="Validação (média)")
     plt.legend()
