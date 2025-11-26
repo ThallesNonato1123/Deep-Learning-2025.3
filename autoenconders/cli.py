@@ -15,6 +15,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--laten_dim", type=int, default=2)
 
     # ADICIONADO:
     parser.add_argument(
@@ -63,6 +64,7 @@ def main():
             num_epochs=args.epochs,
             batch_size=args.batch_size,
             lr=args.lr,
+            latent_dim= args.laten_dim,
             device=device,
         )
 
