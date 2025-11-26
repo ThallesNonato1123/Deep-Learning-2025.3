@@ -99,6 +99,7 @@ def train_autoenconder_model(
         all_ssim.append(ssim_list)
 
     print("\nK-Fold concluído!")
+    torch.save(model.state_dict(), f".vae_model_fold_{fold+1}.pth")
     save_metrics_plots(all_train_losses, all_val_losses, all_ssim, modelType = "ae")
 
     print("\n========== TREINANDO MODELO FINAL EM TODO O DATASET DE TREINO ==========")
@@ -147,6 +148,7 @@ def train_variational_autoenconder_model_kfold(
     num_epochs=50,
     batch_size=64,
     lr=1e-3,
+    latent_dim = 2,
     device="cpu"
 ):
     kf = KFold(n_splits=k, shuffle=True, random_state=42)
@@ -166,7 +168,7 @@ def train_variational_autoenconder_model_kfold(
         val_loader   = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
 
         # Modelo do fold
-        model = VAE(latent_dim=2).to(device)
+        model = VAE(latent_dim).to(device)
         optimizer = optim.AdamW(model.parameters(), lr=lr)
 
         train_losses = []
@@ -267,4 +269,3 @@ def train_variational_autoenconder_model_kfold(
 
     print("\nModelo final treinado em todo o dataset. ✅")
     return final_model
-

@@ -75,13 +75,10 @@ class Decoder(nn.Module):
         )
     
     def forward(self, z: torch.Tensor) -> torch.Tensor:
-        # Transform latent variables to a suitable shape
         z = self.fc(z)
 
-        # Reshape z to (batch_size, 64, 7, 7)
         z = z.view(z.size(0), 64, 7, 7)
 
-        # Upsampling for reconstruction
         x_recon = self.decoder(z)
         return x_recon
     
@@ -89,7 +86,6 @@ class VAE(nn.Module):
     def __init__(self, latent_dim: int):
         super().__init__()
         
-        # Instantiate the Encoder and Decoder
         self.encoder = Encoder(latent_dim)
         self.decoder = Decoder(latent_dim)
         
