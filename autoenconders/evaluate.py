@@ -18,7 +18,7 @@ def compute_ssim_batch(outputs, images):
 
     return total / batch
 
-def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="metrics"):
+def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="metrics", modelType= ""):
     os.makedirs(output_dir, exist_ok=True)
     mean_train = np.mean(np.array(all_train_losses), axis=0)
     mean_val = np.mean(np.array(all_val_losses), axis=0)
@@ -45,7 +45,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.ylabel("Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(output_dir, "val_loss.png"))
+    plt.savefig(os.path.join(output_dir, f"{modelType}-val_loss.png"))
     plt.close()
 
     # ----- SSIM -----
@@ -57,7 +57,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.ylabel("SSIM")
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(output_dir, "ssim.png"))
+    plt.savefig(os.path.join(output_dir, f"{modelType}-ssim.png"))
     plt.close()
 
     #Média folds
@@ -67,7 +67,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.plot(np.log(mean_val), label="Validação (média)")
     plt.legend()
     plt.grid()
-    plt.savefig(os.path.join(output_dir, "learningCurveFolds.png"))
+    plt.savefig(os.path.join(output_dir, f"{modelType}-learningCurveFolds.png"))
     plt.close()
 
     print(f"Gráficos salvos em: {output_dir}/")

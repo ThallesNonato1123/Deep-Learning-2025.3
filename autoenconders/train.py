@@ -99,7 +99,7 @@ def train_autoenconder_model(
         all_ssim.append(ssim_list)
 
     print("\nK-Fold concluído!")
-    save_metrics_plots(all_train_losses, all_val_losses, all_ssim)
+    save_metrics_plots(all_train_losses, all_val_losses, all_ssim, modelType = "ae")
 
     print("\n========== TREINANDO MODELO FINAL EM TODO O DATASET DE TREINO ==========")
     final_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -155,8 +155,6 @@ def train_variational_autoenconder_model_kfold(
     all_val_losses = []
     all_ssim = []
 
-    criterion = nn.MSELoss()
-
     print("========== TREINO K-FOLD VAE ==========")
     for fold, (train_idx, val_idx) in enumerate(kf.split(dataset)):
         print(f"\n=========== FOLD {fold+1}/{k} ===========")
@@ -167,7 +165,7 @@ def train_variational_autoenconder_model_kfold(
         train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
         val_loader   = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
 
-        # modelo do fold
+        # Modelo do fold
         model = VAE(latent_dim=2).to(device)
         optimizer = optim.AdamW(model.parameters(), lr=lr)
 
@@ -177,7 +175,7 @@ def train_variational_autoenconder_model_kfold(
 
         for epoch in range(1, num_epochs + 1):
 
-            # ---------- TREINO ----------
+            # --------------------------- TREINO ---------------------------
             model.train()
             running_loss = 0
             train_bar = tqdm(train_loader, desc=f"🔵 Treinando Fold {fold+1} Epoch {epoch}", leave=False)
@@ -197,7 +195,7 @@ def train_variational_autoenconder_model_kfold(
             train_loss = running_loss / len(train_loader)
             train_losses.append(train_loss)
 
-            # ---------- VALIDAÇÃO ----------
+            # --------------------------- VALIDAÇÃO ---------------------------
             model.eval()
             running_val_loss = 0
             running_val_ssim = 0
@@ -207,22 +205,26 @@ def train_variational_autoenconder_model_kfold(
                 for images, _ in val_bar:
                     images = images.to(device)
 
+                    # forward correto do VAE
                     recon, mu, logvar = model(images)
 
-                    # MSE para validação
-                    mse_loss = criterion(recon, images).item()
-                    running_val_loss += mse_loss
+                    # mesma loss do treino
+                    val_loss = vae_loss_function(recon, images, mu, logvar).item()
+                    running_val_loss += val_loss
 
                     # SSIM
                     batch_ssim = compute_ssim_batch(recon, images)
                     running_val_ssim += batch_ssim
 
-                    val_bar.set_postfix(val_loss=f"{mse_loss:.4f}", ssim=f"{batch_ssim:.4f}")
+                    val_bar.set_postfix(
+                        val_loss=f"{val_loss:.4f}",
+                        ssim=f"{batch_ssim:.4f}"
+                    )
 
-            val_loss = running_val_loss / len(val_loader)
+            mean_val_loss = running_val_loss / len(val_loader)
             mean_ssim = running_val_ssim / len(val_loader)
 
-            val_losses.append(val_loss)
+            val_losses.append(mean_val_loss)
             ssim_list.append(mean_ssim)
 
         all_train_losses.append(train_losses)
@@ -232,7 +234,7 @@ def train_variational_autoenconder_model_kfold(
         torch.save(model.state_dict(), f"./vae_model_fold_{fold+1}.pth")
 
     print("\nK-Fold concluído!")
-    save_metrics_plots(all_train_losses, all_val_losses, all_ssim)
+    save_metrics_plots(all_train_losses, all_val_losses, all_ssim, modelType= "vae")
 
     # ======================================================
     # TREINO FINAL EM TODO O DATASET
@@ -241,7 +243,7 @@ def train_variational_autoenconder_model_kfold(
 
     final_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     final_model = VAE(latent_dim=2).to(device)
-    optimizer = optim.AdamW(final_model.parameters(), lr=lr)
+    optimizer = optim.Adam(final_model.parameters(), lr=lr)
 
     for epoch in range(1, num_epochs + 1):
         final_model.train()

@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Subset, DataLoader
 
 from .train import train_autoenconder_model, train_variational_autoenconder_model_kfold
-from .test import test_model
+from .test import test_model, test_model_vae
 
 
 def main():
@@ -52,7 +52,7 @@ def main():
             num_epochs=args.epochs,
             batch_size=args.batch_size,
             lr=args.lr,
-            device=device
+            device=device,
         )
 
     elif args.model_type == "vae":
@@ -63,15 +63,22 @@ def main():
             num_epochs=args.epochs,
             batch_size=args.batch_size,
             lr=args.lr,
-            device=device
+            device=device,
         )
 
     model = model.to(device)
 
     # Teste
-    test_model(
-        model=model,
-        test_dataset=test_dataset,
-        device=device
-    )
+    if args.model_type == "ae":
+        test_model(
+            model=model,
+            test_dataset=test_dataset,
+            device=device
+        )
+    else:
+        test_model_vae(
+            model=model,
+            test_dataset=test_dataset,
+            device=device
+        )
     

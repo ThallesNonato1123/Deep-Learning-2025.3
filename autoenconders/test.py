@@ -3,6 +3,7 @@ from torch.utils.data import Subset, DataLoader
 from tqdm import tqdm
 from torch import nn
 from skimage.metrics import structural_similarity as ssim
+from .train import vae_loss_function, compute_ssim_batch
 
 
 def test_model(model, test_dataset, device="cpu", criterion=nn.MSELoss()):
@@ -51,3 +52,43 @@ def test_model(model, test_dataset, device="cpu", criterion=nn.MSELoss()):
     print(f"    📌 Test SSIM: {final_test_ssim:.4f}")
 
     return final_test_loss, final_test_ssim
+
+def test_model_vae(model, test_dataset, device="cpu"):
+    model.eval()
+
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    test_bar = tqdm(test_loader, desc="🟡 Testando VAE", leave=False)
+
+    test_loss = 0.0
+    test_ssim = 0.0
+    count = 0
+
+    with torch.no_grad():
+        for images, _ in test_bar:
+            images = images.to(device)
+
+            # forward correto do VAE
+            recon, mu, logvar = model(images)
+
+            # mesma loss do treino e validação
+            loss = vae_loss_function(recon, images, mu, logvar).item()
+            test_loss += loss
+
+            # SSIM por batch
+            batch_ssim = compute_ssim_batch(recon, images)
+            test_ssim += batch_ssim
+
+            count += 1
+
+            test_bar.set_postfix(
+                loss=f"{loss:.4f}",
+                ssim=f"{batch_ssim:.4f}"
+            )
+
+    final_loss = test_loss / count
+    final_ssim = test_ssim / count
+
+    print(f"\n📌 Test VAE Loss: {final_loss:.4f}")
+    print(f"📌 Test VAE SSIM: {final_ssim:.4f}")
+
+    return final_loss, final_ssim
