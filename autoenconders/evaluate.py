@@ -64,7 +64,6 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.figure(figsize=(10,5))
     plt.title("Learning Curve - Média dos Folds")
     plt.plot(np.log(mean_train), label="Treino (média)")
-    plt.plot(np.log(mean_val), label="Validação (média)")
     plt.legend()
     plt.grid()
     plt.savefig(os.path.join(output_dir, f"{modelType}-learningCurveFolds.png"))
