@@ -9,7 +9,7 @@ from torch.utils.data import Subset, DataLoader
 from .train import train_autoenconder_model, train_variational_autoenconder_model_kfold
 from .test import test_model, test_model_vae
 from .evaluate import show_autoencoder_results
-from .model import Autoencoder, VariationalAutoencoder
+from .model import Autoencoder, VAE
 
 
 def build_parser():
@@ -103,7 +103,7 @@ def run_cli():
         if args.model_type == "ae":
             model = Autoencoder().to(device)
         else:
-            model = VariationalAutoencoder(args.latent_dim).to(device)
+            model = VAE(args.latent_dim).to(device)
 
         model.load_state_dict(torch.load(args.model_path, map_location=device))
 
