@@ -21,7 +21,6 @@ def train_autoenconder_model(
     criterion = nn.MSELoss()
     kf = KFold(n_splits=k, shuffle=True, random_state=42)
 
-    # listas para métricas K-Fold
     all_train_losses = []
     all_val_losses = []
     all_ssim = []
@@ -29,15 +28,11 @@ def train_autoenconder_model(
     print("========== TREINO K-FOLD PARA AVALIAÇÃO ==========")
     for fold, (train_idx, val_idx) in enumerate(kf.split(dataset)):
         print(f"\n=========== FOLD {fold+1}/{k} ===========")
-
-        # Subsets
         train_subset = Subset(dataset, train_idx)
         val_subset   = Subset(dataset, val_idx)
-
         training_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
         validation_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
 
-        # Modelo do fold
         model = Autoencoder().to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
 

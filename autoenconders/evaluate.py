@@ -74,20 +74,28 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
 
     print(f"Gráficos salvos em: {output_dir}/")
 
-def show_autoencoder_results(model, loader, device='cuda', num_images=8, output_dir="outputs", filename="autoencoder_output.png"):
+def show_autoencoder_results(model, loader, device='cuda', num_images=8,
+                             output_dir="outputs", filename="autoencoder_output.png"):
     model.eval()
 
-    # cria a pasta outputs se não existir
+    import os
+
+    # ----- criar outputs UMA PASTA FORA de Autoenconder -----
+    base_dir = os.path.dirname(os.path.abspath(__file__))      # Autoenconder/
+    parent_dir = os.path.abspath(os.path.join(base_dir, "..")) # Mestrado/
+    output_dir = os.path.join(parent_dir, output_dir)          # Mestrado/outputs/
+
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, filename)
+    # ---------------------------------------------------------
 
     images, _ = next(iter(loader))
     images = images.to(device)
 
     with torch.no_grad():
         x = images.view(-1, 28*28)
-        z = model.encoder(x)           
-        outputs = model.decoder(z)     
+        z = model.encoder(x)
+        outputs = model.decoder(z)
 
     outputs = outputs.view(-1, 1, 28, 28).cpu()
     images = images.cpu()
@@ -109,4 +117,5 @@ def show_autoencoder_results(model, loader, device='cuda', num_images=8, output_
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
     plt.close()
+
     print(f"✅ Output salvo em: {save_path}")
