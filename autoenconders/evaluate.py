@@ -5,9 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def compute_ssim_batch(outputs, images):
-    """
-    Calcula SSIM imagem a imagem para um batch.
-    """
     total = 0
     batch = images.size(0)
 
@@ -18,13 +15,12 @@ def compute_ssim_batch(outputs, images):
 
     return total / batch
 
-def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="metrics", modelType= ""):
+def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="metrics", modelType=""):
     os.makedirs(output_dir, exist_ok=True)
     mean_train = np.mean(np.array(all_train_losses), axis=0)
     mean_val = np.mean(np.array(all_val_losses), axis=0)
     mean_ssim = np.mean(np.array(all_ssim), axis=0)
 
-    # ----- LOSS DE TREINO -----
     plt.figure(figsize=(10, 6))
     for i, fold_losses in enumerate(all_train_losses):
         plt.plot(np.log(fold_losses), label=f"Fold {i+1}")
@@ -36,7 +32,6 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.savefig(os.path.join(output_dir, f"{modelType}-train_loss.png"))
     plt.close()
 
-    # ----- LOSS DE VALIDAÇÃO -----
     plt.figure(figsize=(10, 6))
     for i, fold_losses in enumerate(all_val_losses):
         plt.plot(np.log(fold_losses), label=f"Fold {i+1}")
@@ -48,7 +43,6 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.savefig(os.path.join(output_dir, f"{modelType}-val_loss.png"))
     plt.close()
 
-    # ----- SSIM -----
     plt.figure(figsize=(10, 6))
     for i, fold_ssim in enumerate(all_ssim):
         plt.plot(fold_ssim, label=f"Fold {i+1}")
@@ -60,8 +54,7 @@ def save_metrics_plots(all_train_losses, all_val_losses, all_ssim, output_dir="m
     plt.savefig(os.path.join(output_dir, f"{modelType}-ssim.png"))
     plt.close()
 
-    #Média folds
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(10, 5))
     plt.title("Learning Curve - Média dos Folds")
     plt.xlabel("Época")
     plt.ylabel("Loss")
@@ -78,16 +71,12 @@ def show_autoencoder_results(model, loader, device='cuda', num_images=8,
                              output_dir="outputs", filename="autoencoder_output.png"):
     model.eval()
 
-    import os
-
-    # ----- criar outputs UMA PASTA FORA de Autoenconder -----
-    base_dir = os.path.dirname(os.path.abspath(__file__))      # Autoenconder/
-    parent_dir = os.path.abspath(os.path.join(base_dir, "..")) # Mestrado/
-    output_dir = os.path.join(parent_dir, output_dir)          # Mestrado/outputs/
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(base_dir, ".."))
+    output_dir = os.path.join(parent_dir, output_dir)
 
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, filename)
-    # ---------------------------------------------------------
 
     images, _ = next(iter(loader))
     images = images.to(device)
@@ -102,13 +91,11 @@ def show_autoencoder_results(model, loader, device='cuda', num_images=8,
 
     plt.figure(figsize=(12, 6))
     for i in range(num_images):
-        # Input
         plt.subplot(3, num_images, i+1)
         plt.imshow(images[i].squeeze(), cmap='gray')
         plt.title("Input")
         plt.axis("off")
 
-        # Decoded
         plt.subplot(3, num_images, 2*num_images + i + 1)
         plt.imshow(outputs[i].squeeze(), cmap='gray')
         plt.title("Decoded")
@@ -118,4 +105,43 @@ def show_autoencoder_results(model, loader, device='cuda', num_images=8,
     plt.savefig(save_path, dpi=150)
     plt.close()
 
-    print(f"✅ Output salvo em: {save_path}")
+    print(f"Output salvo em: {save_path}")
+
+def show_vae_results(model, loader, device='cuda', num_images=8,
+                     output_dir="outputs", filename="vae_output.png"):
+    model.eval()
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(base_dir, ".."))
+    output_dir = os.path.join(parent_dir, output_dir)
+
+    os.makedirs(output_dir, exist_ok=True)
+    save_path = os.path.join(output_dir, filename)
+
+    images, _ = next(iter(loader))
+    images = images.to(device)
+
+    with torch.no_grad():
+        x = images
+        outputs, mu, logvar = model(x)
+
+    outputs = outputs.cpu()
+    images = images.cpu()
+
+    plt.figure(figsize=(12, 6))
+    for i in range(num_images):
+        plt.subplot(3, num_images, i + 1)
+        plt.imshow(images[i].squeeze(), cmap="gray")
+        plt.title("Input")
+        plt.axis("off")
+
+        plt.subplot(3, num_images, 2 * num_images + i + 1)
+        plt.imshow(outputs[i].squeeze(), cmap="gray")
+        plt.title("Decoded")
+        plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+
+    print(f"VAE output salvo em: {save_path}")

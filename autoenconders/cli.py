@@ -8,7 +8,7 @@ from torch.utils.data import Subset, DataLoader
 
 from .train import train_autoenconder_model, train_variational_autoenconder_model_kfold
 from .test import test_model, test_model_vae
-from .evaluate import show_autoencoder_results
+from .evaluate import show_autoencoder_results, show_vae_results
 from .model import Autoencoder, VAE
 
 
@@ -43,7 +43,7 @@ def build_parser():
     return parser
 
 
-def run_cli():
+def main():
     parser = build_parser()
     args = parser.parse_args()
 
@@ -107,18 +107,26 @@ def run_cli():
 
         model.load_state_dict(torch.load(args.model_path, map_location=device))
 
-        # Dataset para obter imagens
+        # Dataset para obter imagens reais
         transform = transforms.ToTensor()
         dataset = FashionMNIST("./data", download=True, transform=transform)
         loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-        show_autoencoder_results(
-            model=model,
-            loader=loader,
-            device=device,
-            num_images=args.num_images,
-            output_dir=args.output_dir,
-            filename=args.filename
-        )
-
-        return
+        if args.model_type == "ae":
+            show_autoencoder_results(
+                model=model,
+                loader=loader,
+                device=device,
+                num_images=args.num_images,
+                output_dir=args.output_dir,
+                filename=args.filename
+            )
+        else:
+            show_vae_results(
+                model=model,
+                loader=loader,
+                device=device,
+                num_images=args.num_images,
+                output_dir=args.output_dir,
+                filename=args.filename
+            )
